@@ -9,26 +9,29 @@ function App() {
     const [addingMovie, setAddingMovie] = useState(false);
 
     async function handleAddMovie(movie) {
-
         const response = await fetch('/movies', {
-      
-          method: 'POST',
-      
-          body: JSON.stringify(movie),
-      
-          headers: { 'Content-Type': 'application/json' }
-      
-        });
-      
-        if (response.ok) {
-      
-          setMovies([...movies, movie]);
-      
-          setAddingMovie(false);
-      
-        }
-      
-      }
+             method: 'POST',
+                body: JSON.stringify(movie),
+              headers: { 'Content-Type': 'application/json' }
+             });
+             if (response.ok) {
+                const movieFromServer = await response.json();
+                setMovies([...movies, movieFromServer]);
+                setAddingMovie(false);
+              }
+            }
+
+      async function handleDeleteMovie(movie) {
+
+        const response = await fetch(`/movies/${movie.id}`, {
+             method: 'DELETE',
+           });
+          if (response.ok) {
+               const nextMovies = movies.filter(m => m !== movie);
+               setMovies(nextMovies);
+           }
+       }
+
       useEffect(() => {
         async function fetchMovies() {
           const response = await fetch('/movies');
@@ -37,9 +40,7 @@ function App() {
             setMovies(movies);
         }
       }
-
       fetchMovies();
-
     }, [])
 
     return (
@@ -48,7 +49,7 @@ function App() {
             {movies.length === 0
                 ? <p>No movies yet. Maybe add something?</p>
                 : <MoviesList movies={movies}
-                              onDeleteMovie={(movie) => setMovies(movies.filter(m => m !== movie))}
+                              onDeleteMovie={handleDeleteMovie}
                 />}
             {addingMovie
                 ? <MovieForm onMovieSubmit={handleAddMovie}
