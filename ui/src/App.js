@@ -15,7 +15,7 @@ function App() {
   const [addingMovieToActor, setAddingMovieToActor] = useState(false);
 
   async function handleAddMovie(movie) {
-    const response = await fetch("/movies", {
+    const response = await fetch("/movies/", {
       method: "POST",
       body: JSON.stringify(movie),
       headers: { "Content-Type": "application/json" },
@@ -76,20 +76,20 @@ function App() {
   }
 
   useEffect(() => {
-    async function fetchMovies() {
-      const response = await fetch(`/movies`);
+    const fetchMovies = async () => {
+      const response = await fetch(`/movies/`);
       if (response.ok) {
         const movies = await response.json();
         setMovies(movies);
       }
-    }
-    async function fetchActors() {
+    };
+    const fetchActors = async () => {
       const response = await fetch(`/actors`);
       if (response.ok) {
         const actors = await response.json();
         setActors(actors);
       }
-    }
+    };
     fetchMovies();
     fetchActors();
   }, [addingMovieToActor]);
@@ -98,18 +98,18 @@ function App() {
     <div className="container">
       <h1>My favourite movies to watch</h1>
       {movies.length === 0 ? (
-        <p>No movies yet. Maybe add something?</p>
+        <p>No movies yet?</p>
       ) : (
         <MoviesList movies={movies} onDeleteMovie={handleDeleteMovie} />
       )}
       {addingMovie ? (
-        <MovieForm onMovieSubmit={handleAddMovie} buttonLabel="Add a movie" />
+        <MovieForm onMovieSubmit={handleAddMovie} buttonLabel="Add movie" />
       ) : (
-        <button onClick={() => setAddingMovie(true)}>Add a movie</button>
+        <button onClick={() => setAddingMovie(true)}>Add movie</button>
       )}
 
       {actors.length === 0 ? (
-        <p>No actors yet. Maybe add anyone?</p>
+        <p>No actors yet?</p>
       ) : (
         <ActorsList actors={actors} onDeleteActor={handleDeleteActor} />
       )}
