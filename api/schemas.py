@@ -37,6 +37,8 @@ class MovieBase(BaseModel):
 class MovieCreate(MovieBase):
     pass
 
+class ActorToMovie(BaseModel):
+    actor_id: int
 
 class Movie(MovieBase):
     id: int
