@@ -24,4 +24,4 @@ DELETE http://127.0.0.1:8000/movies/5
 Accept: application/json
 
 POST http://127.0.0.1:8000/actors
-Accept: application/json
+Content-Type: application/json
