@@ -7,8 +7,6 @@ import ActorForm from "./ActorForm";
 import ActorsList from "./ActorsList";
 import AddActorToMovieForm from "./AddActorToMovieForm";
 
-import AddActorToMovieForm from "./AddActorToMovieForm";
-
 function App() {
   const [movies, setMovies] = useState([]);
   const [actors, setActors] = useState([]);
