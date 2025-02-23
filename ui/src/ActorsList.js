@@ -4,7 +4,7 @@ export default function ActorsList(props) {
   return (
     <div>
       <strong>Actors:</strong>
-      <ul className="movies-list">
+      <ul className="actors-list">
         {props.actors.map((actor) => (
           <li key={actor.id}>
             <ActorListItem

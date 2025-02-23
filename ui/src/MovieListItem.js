@@ -1,4 +1,4 @@
-import ActorsList from "./ActorsList";
+import MoviesList from "./MoviesList";
 
 export default function MovieListItem(props) {
   return (

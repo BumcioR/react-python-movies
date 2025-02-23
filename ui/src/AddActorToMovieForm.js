@@ -17,10 +17,15 @@ export default function AddActorToMovieForm(props) {
   function addActorToMovie(event) {
     event.preventDefault();
 
+    if (!selectedMovie || !selectedActor) {
+      return alert("Please select both a movie and an actor");
+    }
+
     props.onAddATMFSubmit(selectedMovie, selectedActor);
     setSelectedMovie("");
     setSelectedActor("");
   }
+
   return (
     <form onSubmit={addActorToMovie}>
       <h2>Add actor to movie</h2>

@@ -1,22 +1,19 @@
-import ActorsList from "./ActorsList";
+import React from "react";
 
-export default function MovieListItem(props) {
+export default function ActorListItem(props) {
   return (
     <div>
       <div>
-        <strong>{props.movie.title}</strong> <span>({props.movie.year})</span>{" "}
-        directed by {props.movie.director}{" "}
-        <a onClick={props.onDelete}>Delete</a>
+        <strong>
+          {props.actor.name} {props.actor.surname}
+        </strong>
+        <button
+          onClick={props.onDelete}
+          style={{ marginLeft: "10px", color: "red" }}
+        >
+          Delete
+        </button>
       </div>
-      <div>
-        <span>Actors:</span>
-        <ul>
-          {props.movie.actors.map((actor) => (
-            <li key={actor.id}>{`${actor.name} ${actor.surname}`}</li>
-          ))}
-        </ul>
-      </div>
-      {props.movie.description}
     </div>
   );
 }

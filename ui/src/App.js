@@ -12,7 +12,8 @@ function App() {
   const [actors, setActors] = useState([]);
   const [addingMovie, setAddingMovie] = useState(false);
   const [addingActor, setAddingActor] = useState(false);
-  const [addingMovieToActor, setAddingMovieToActor] = useState(false);
+
+  const [addingActorToMovie, setAddingActorToMovie] = useState(false);
 
   async function handleAddMovie(movie) {
     const response = await fetch("/movies/", {
@@ -22,7 +23,7 @@ function App() {
     });
     if (response.ok) {
       const movieFromServer = await response.json();
-      setMovies([...movies, movieFromServer]);
+      setMovies((prevMovies) => [...prevMovies, movieFromServer]);
       setAddingMovie(false);
     }
   }
@@ -32,12 +33,11 @@ function App() {
       method: "DELETE",
     });
     if (response.ok) {
-      const nextMovies = movies.filter((m) => m.id !== movie.id);
-      setMovies(nextMovies);
+      setMovies((prevMovies) => prevMovies.filter((m) => m.id !== movie.id));
     }
   }
 
-  async function handleAddActors(actor) {
+  async function handleAddActor(actor) {
     const response = await fetch("/actors/", {
       method: "POST",
       body: JSON.stringify(actor),
@@ -45,7 +45,7 @@ function App() {
     });
     if (response.ok) {
       const actorFromServer = await response.json();
-      setActors([...actors, actorFromServer]);
+      setActors((prevActors) => [...prevActors, actorFromServer]);
       setAddingActor(false);
     }
   }
@@ -55,8 +55,7 @@ function App() {
       method: "DELETE",
     });
     if (response.ok) {
-      const nextActor = actors.filter((a) => a.id !== actor.id);
-      setActors(nextActor);
+      setActors((prevActors) => prevActors.filter((a) => a.id !== actor.id));
     }
   }
 
@@ -71,7 +70,7 @@ function App() {
       setMovies((prevMovies) =>
         prevMovies.map((m) => (m.id === movie_id ? updatedMovie : m))
       );
-      setAddingMovieToActor(false);
+      setAddingActorToMovie(false);
     }
   }
 
@@ -92,7 +91,7 @@ function App() {
     };
     fetchMovies();
     fetchActors();
-  }, [addingMovieToActor]);
+  }, [addingActorToMovie]);
 
   return (
     <div className="container">
@@ -107,19 +106,18 @@ function App() {
       ) : (
         <button onClick={() => setAddingMovie(true)}>Add movie</button>
       )}
-
       {actors.length === 0 ? (
         <p>No actors yet?</p>
       ) : (
         <ActorsList actors={actors} onDeleteActor={handleDeleteActor} />
       )}
       {addingActor ? (
-        <ActorForm onActorSubmit={handleAddActors} buttonLabel="Add an actor" />
+        <ActorForm onActorSubmit={handleAddActor} buttonLabel="Add an actor" />
       ) : (
         <button onClick={() => setAddingActor(true)}>Add an actor</button>
       )}
       <div>
-        {addingMovieToActor ? (
+        {addingActorToMovie ? (
           actors.length === 0 || movies.length === 0 ? (
             <p>You can add more</p>
           ) : (
@@ -131,7 +129,7 @@ function App() {
             />
           )
         ) : (
-          <button onClick={() => setAddingMovieToActor(true)}>
+          <button onClick={() => setAddingActorToMovie(true)}>
             Add Actors to Movies
           </button>
         )}

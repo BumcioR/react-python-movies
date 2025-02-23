@@ -1,12 +1,27 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from typing import List
-
 import models
 import schemas
+from peewee import DoesNotExist, IntegrityError
 
 app = FastAPI()
+
+# Konfiguracja CORS
+origins = [
+    "http://localhost:3000", 
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"], 
+)
+
 app.mount("/static", StaticFiles(directory="../ui/build/static", check_dir=False), name="static")
 
 @app.get("/")
@@ -15,61 +30,91 @@ def serve_react_app():
 
 @app.get("/movies/", response_model=List[schemas.Movie])
 def get_movies():
-    return list(models.Movie.select())
+    try:
+        movies = list(models.Movie.select())
+        return movies
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching movies: {str(e)}")
+
 @app.get("/movies/{movie_id}", response_model=schemas.Movie)
 def get_movie(movie_id: int):
-    movie = models.Movie.filter(models.Movie.id == movie_id).first()
-    if movie is None:
+    try:
+        movie = models.Movie.get(models.Movie.id == movie_id)
+        return movie
+    except DoesNotExist:
         raise HTTPException(status_code=404, detail="Movie not found")
-    return movie
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching movie: {str(e)}")
 
 @app.post("/movies/", response_model=schemas.Movie)
 def add_movie(movie: schemas.MovieBase):
-    movie = models.Movie.create(**movie.model_dump())
-    return movie
-
+    try:
+        new_movie = models.Movie.create(**movie.model_dump())
+        return new_movie
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail="Movie already exists")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding movie: {str(e)}")
 
 @app.delete("/movies/{movie_id}", response_model=schemas.Movie)
 def delete_movie(movie_id: int):
-    movie = models.Movie.filter(models.Movie.id == movie_id).first()
-    if movie is None:
+    try:
+        movie = models.Movie.get(models.Movie.id == movie_id)
+        movie.delete_instance()
+        return movie
+    except DoesNotExist:
         raise HTTPException(status_code=404, detail="Movie not found")
-    movie.delete_instance()
-    return movie
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting movie: {str(e)}")
 
-#actors:
 @app.get("/actors/", response_model=List[schemas.Actor])
 def get_actors():
-    return list(models.Actor.select())
+    try:
+        actors = list(models.Actor.select())
+        return actors
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching actors: {str(e)}")
 
 @app.get("/actors/{actor_id}", response_model=schemas.Actor)
 def get_actor(actor_id: int):
-    actor = models.Actor.get(models.Actor.id == actor_id)
-    if actor is None:
+    try:
+        actor = models.Actor.get(models.Actor.id == actor_id)
+        return actor
+    except DoesNotExist:
         raise HTTPException(status_code=404, detail="Actor not found")
-    return actor
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching actor: {str(e)}")
 
 @app.post("/actors/", response_model=schemas.Actor)
 def add_actor(actor: schemas.ActorBase):
-    newActor = models.Actor.create(**actor.model_dump())
-    return newActor
+    try:
+        new_actor = models.Actor.create(**actor.model_dump())
+        return new_actor
+    except IntegrityError:
+        raise HTTPException(status_code=400, detail="Actor already exists")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding actor: {str(e)}")
 
 @app.delete("/actors/{actor_id}", response_model=schemas.Actor)
 def delete_actor(actor_id: int):
-    actor = models.Actor.filter(models.Actor.id == actor_id).first()
-    if actor is None:
+    try:
+        actor = models.Actor.get(models.Actor.id == actor_id)
+        actor.delete_instance()
+        return actor
+    except DoesNotExist:
         raise HTTPException(status_code=404, detail="Actor not found")
-    actor.delete_instance()
-    return actor
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error deleting actor: {str(e)}")
 
 @app.post("/movies/{movie_id}/actors", response_model=schemas.Movie)
 def update_actor(movie_id: int, actor_data: schemas.ActorToMovie):
-    movie = models.Movie.filter(models.Movie.id == movie_id).first()
-    actor = models.Actor.filter(models.Actor.id == actor_data.actor_id).first()
-    if movie is None:
-        raise HTTPException(status_code=404, detail="Movie not found")
-    if actor is None:
-        raise HTTPException(status_code=404, detail="Actor not found")
-    movie.actors.add(actor)
-    movie.save()
-    return movie
+    try:
+        movie = models.Movie.get(models.Movie.id == movie_id)
+        actor = models.Actor.get(models.Actor.id == actor_data.actor_id)
+        movie.add_actor(actor)
+        movie.save()
+        return movie
+    except DoesNotExist:
+        raise HTTPException(status_code=404, detail="Movie or Actor not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding actor to movie: {str(e)}")

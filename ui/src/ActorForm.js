@@ -6,9 +6,15 @@ export default function ActorForm(props) {
 
   function addActor(event) {
     event.preventDefault();
+
     if (name.length < 2) {
       return alert("Imie jest za krotkie");
     }
+
+    if (surname.length < 2) {
+      return alert("Nazwisko jest za krotkie");
+    }
+
     props.onActorSubmit({ name, surname });
     setName("");
     setSurname("");
